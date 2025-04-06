@@ -38,10 +38,12 @@ bun run dev
 
 ---
 
+## 👩‍💻 Aluna
 
-## 📌 Aluna
-Miszleni
-Curso: Sistemas de Informação - UNEMAT
+**Miszleni**  
+Curso: **Sistemas de Informação – UNEMAT**
+
+---
 
 ## 🧠 Observações
 Este sistema simula reservas em salas de cinema e utiliza Vue 3 com foco em boas práticas de componentes, navegação e responsividade com Vuetify.
