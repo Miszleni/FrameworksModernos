@@ -27,19 +27,21 @@ Este projeto foi desenvolvido como parte da avaliação da disciplina **Framewor
 ## 🚀 Como executar o projeto
 
 ```bash
-npm install
-npm run dev
+bun install
+# ou npm install / yarn install
+
+bun run dev
+# ou npm run dev
+
 # depois abra no navegador: http://localhost:5173
 ```
 
 ---
 
-## 👩‍💻 Aluna
 
-**Miszleni**  
-Curso: **Sistemas de Informação – UNEMAT**
-
----
+## 📌 Aluna
+Miszleni
+Curso: Sistemas de Informação - UNEMAT
 
 ## 🧠 Observações
 Este sistema simula reservas em salas de cinema e utiliza Vue 3 com foco em boas práticas de componentes, navegação e responsividade com Vuetify.
