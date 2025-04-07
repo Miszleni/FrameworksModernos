@@ -23,7 +23,7 @@
       </template>
     </v-app-bar>
 
-    <!-- Conteúdo da página -->
+    <!-- Conteudo da pagina -->
     <v-main>
       <router-view />
     </v-main>

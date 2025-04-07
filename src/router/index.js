@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Importações de páginas
+// Importaçoes d e paginas
 import Redirector from '../pages/Redirector.vue'
 import Login from '../pages/Login.vue'
 import Cadastro from '../pages/Cadastro.vue'
@@ -33,7 +33,7 @@ const router = createRouter({
   routes
 })
 
-// Proteção de rotas (middleware)
+// Proteçao de rotas
 router.beforeEach((to, from, next) => {
   const isLoggedIn = !!localStorage.getItem('usuarioLogado')
 

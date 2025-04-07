@@ -164,7 +164,7 @@ function reservarSala() {
     data: dataSelecionada.value.split('-').reverse().join('/'),
     nome: nomeReserva.value,
     observacao: observacao.value,
-    usuarioEmail: usuario.email // 🔐 ESSENCIAL!
+    usuarioEmail: usuario.email // ESSENCIAL!!!!!!
   }
 
   const jaExiste = reservas.some(

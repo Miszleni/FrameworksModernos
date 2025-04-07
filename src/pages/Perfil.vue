@@ -74,7 +74,7 @@ import { useTheme } from 'vuetify'
 const router = useRouter()
 const theme = useTheme()
 
-// Dados do usuário
+// Dados do usuario
 const usuario = ref('')
 const novaSenha = ref('')
 const confirmarSenha = ref('')

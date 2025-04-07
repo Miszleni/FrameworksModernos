@@ -21,7 +21,7 @@
           <v-card-title class="d-flex justify-space-between align-center">
             <span>🎟️ Reserva #{{ index + 1 }}</span>
 
-            <!-- Botão claro de cancelar com ícone -->
+            <!-- Botão de cancelar com icone -->
             <v-btn
               size="small"
               color="red-darken-2"
