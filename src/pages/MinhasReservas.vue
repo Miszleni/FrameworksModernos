@@ -1,94 +1,96 @@
 <template>
   <v-container>
-    <h2>📋 Minhas Reservas</h2>
-    <p class="mb-4">Total de reservas: <strong>{{ reservas.length }}</strong></p>
+    <h2 class="text-h5 mb-4">📅 Minhas Reservas</h2>
 
     <v-alert
       v-if="reservas.length === 0"
       type="info"
-      variant="outlined"
       class="mt-4"
     >
       Você ainda não fez nenhuma reserva.
     </v-alert>
 
-    <div v-for="(grupo, data) in reservasAgrupadas" :key="data" class="mb-6">
-      <h3 class="mb-2">📅 {{ data }}</h3>
-
-      <v-card
-        v-for="(reserva, index) in grupo"
+    <v-row v-else>
+      <v-col
+        v-for="(reserva, index) in reservas"
         :key="index"
-        class="mb-3 pa-4"
-        elevation="2"
+        cols="12"
+        md="6"
       >
-        <p><strong>Sala:</strong> {{ reserva.sala }}</p>
-        <p><strong>Horário:</strong> {{ reserva.horario }}</p>
-        <p v-if="reserva.nome"><strong>Para:</strong> {{ reserva.nome }}</p>
-        <p v-if="reserva.observacao"><strong>Observações:</strong> {{ reserva.observacao }}</p>
+        <v-card class="mb-4" elevation="2">
+          <v-card-title class="d-flex justify-space-between align-center">
+            <span>🎟️ Reserva #{{ index + 1 }}</span>
 
-        <v-btn
-          :to="`/reserva/${reserva.id}`"
-          color="primary"
-          class="mt-2 me-2"
-        >
-          Ver Detalhes
-        </v-btn>
+            <!-- Botão claro de cancelar com ícone -->
+            <v-btn
+              size="small"
+              color="red-darken-2"
+              variant="outlined"
+              @click="cancelarReserva(index)"
+            >
+              <v-icon start>mdi-delete</v-icon>
+              Cancelar
+            </v-btn>
+          </v-card-title>
 
-        <v-btn color="red-darken-3" @click="cancelarReserva(data, reserva)">
-          Cancelar Reserva
-        </v-btn>
-      </v-card>
-    </div>
+          <v-card-text>
+            <p><strong>Sala:</strong> {{ reserva.sala || reserva.salaNome }}</p>
+            <p><strong>Data:</strong> {{ reserva.data }}</p>
+            <p><strong>Horário:</strong> {{ reserva.horario }}</p>
+            <p><strong>Nome Reservante:</strong> {{ reserva.nome }}</p>
+            <p v-if="reserva.observacao"><strong>Observações:</strong> {{ reserva.observacao }}</p>
+          </v-card-text>
 
-    <v-snackbar v-model="snackbar" color="error" timeout="3000">
+          <v-card-actions>
+            <RouterLink :to="`/reserva/${reserva.id}`">
+              <v-btn color="primary" variant="text">
+                Ver Detalhes
+              </v-btn>
+            </RouterLink>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-snackbar v-model="snackbar" color="success" timeout="2500">
       Reserva cancelada com sucesso!
-      <template #actions>
-        <v-btn variant="text" @click="snackbar = false">Fechar</v-btn>
-      </template>
     </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const reservas = ref([])
 const snackbar = ref(false)
 
 onMounted(() => {
-  carregarReservas()
+  const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
+  const todasReservas = JSON.parse(localStorage.getItem('reservas')) || []
+
+  reservas.value = todasReservas.filter(
+    r => r.usuarioEmail === usuario?.email
+  )
 })
 
-function carregarReservas() {
-  const dados = localStorage.getItem('reservas')
-  reservas.value = dados ? JSON.parse(dados) : []
-}
+function cancelarReserva(index) {
+  const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
+  const todasReservas = JSON.parse(localStorage.getItem('reservas')) || []
 
-// Agrupar por data
-const reservasAgrupadas = computed(() => {
-  const grupos = {}
-  reservas.value.forEach((reserva) => {
-    if (!grupos[reserva.data]) {
-      grupos[reserva.data] = []
-    }
-    grupos[reserva.data].push(reserva)
-  })
-  return grupos
-})
+  const reservasUsuario = todasReservas.filter(
+    r => r.usuarioEmail === usuario.email
+  )
 
-function cancelarReserva(data, reservaAlvo) {
-  if (confirm('Deseja mesmo cancelar esta reserva?')) {
-    reservas.value = reservas.value.filter(
-      (reserva) =>
-        !(
-          reserva.sala === reservaAlvo.sala &&
-          reserva.horario === reservaAlvo.horario &&
-          reserva.data === data &&
-          reserva.id === reservaAlvo.id
-        )
-    )
-    localStorage.setItem('reservas', JSON.stringify(reservas.value))
-    snackbar.value = true
-  }
+  reservasUsuario.splice(index, 1)
+
+  const reservasOutrosUsuarios = todasReservas.filter(
+    r => r.usuarioEmail !== usuario.email
+  )
+
+  const novasReservas = [...reservasOutrosUsuarios, ...reservasUsuario]
+  localStorage.setItem('reservas', JSON.stringify(novasReservas))
+
+  reservas.value = reservasUsuario
+  snackbar.value = true
 }
 </script>

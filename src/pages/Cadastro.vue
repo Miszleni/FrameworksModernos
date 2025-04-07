@@ -1,97 +1,114 @@
 <template>
-    <v-container>
-      <h2>Cadastro de Usuário</h2>
+  <v-container>
+    <v-card class="pa-6 mx-auto" max-width="500">
+      <h2 class="text-center mb-4">📝 Cadastro</h2>
+
       <v-text-field
-        v-model="novoUsuario"
-        label="Novo Usuário"
-        :error="erroUsuario"
-        :error-messages="erroUsuarioMsg"
+        label="Nome"
+        v-model="nome"
+        required
       />
-  
+
       <v-text-field
-        v-model="novaSenha"
-        label="Nova Senha"
+        label="E-mail"
+        v-model="email"
+        type="email"
+        required
+      />
+
+      <v-text-field
+        label="Senha"
+        v-model="senha"
         type="password"
-        :error="erroSenha"
-        :error-messages="erroSenhaMsg"
+        required
+        :rules="[senhaMinima]"
       />
-  
+
       <v-text-field
-        v-model="confirmarSenha"
         label="Confirmar Senha"
+        v-model="confirmarSenha"
         type="password"
-        :error="erroConfirmarSenha"
-        :error-messages="erroConfirmarSenhaMsg"
+        required
+        :rules="[confirmaSenha]"
       />
-  
-      <v-btn color="primary" @click="cadastrar">Cadastrar</v-btn>
-    </v-container>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  
-  const novoUsuario = ref('')
-  const novaSenha = ref('')
-  const confirmarSenha = ref('')
-  const router = useRouter()
-  
-  // validações
-  const erroUsuario = ref(false)
-  const erroSenha = ref(false)
-  const erroConfirmarSenha = ref(false)
-  
-  const erroUsuarioMsg = ref('')
-  const erroSenhaMsg = ref('')
-  const erroConfirmarSenhaMsg = ref('')
-  
-  function cadastrar() {
-    erroUsuario.value = false
-    erroSenha.value = false
-    erroConfirmarSenha.value = false
-    erroUsuarioMsg.value = ''
-    erroSenhaMsg.value = ''
-    erroConfirmarSenhaMsg.value = ''
-  
-    let valido = true
-  
-    // Validação usuário
-    if (!novoUsuario.value || novoUsuario.value.length < 3) {
-      erroUsuario.value = true
-      erroUsuarioMsg.value = 'Usuário deve ter no mínimo 3 caracteres'
-      valido = false
-    }
-  
-    // Validação senha
-    if (!novaSenha.value || novaSenha.value.length < 6) {
-      erroSenha.value = true
-      erroSenhaMsg.value = 'Senha deve ter pelo menos 6 caracteres'
-      valido = false
-    } else if (!/[A-Z]/.test(novaSenha.value)) {
-      erroSenha.value = true
-      erroSenhaMsg.value = 'Senha deve conter ao menos uma letra maiúscula'
-      valido = false
-    } else if (!/[0-9]/.test(novaSenha.value)) {
-      erroSenha.value = true
-      erroSenhaMsg.value = 'Senha deve conter ao menos um número'
-      valido = false
-    }
-  
-    // Confirmação de senha
-    if (novaSenha.value !== confirmarSenha.value) {
-      erroConfirmarSenha.value = true
-      erroConfirmarSenhaMsg.value = 'As senhas não coincidem'
-      valido = false
-    }
-  
-    if (!valido) return
-  
-    // Tudo OK
-    localStorage.setItem('usuario_cadastrado', novoUsuario.value)
-    localStorage.setItem('senha_cadastrada', novaSenha.value)
-    alert('Usuário cadastrado com sucesso!')
-    router.push('/')
+
+      <v-btn
+        class="mt-4"
+        color="green-darken-1"
+        block
+        @click="fazerCadastro"
+      >
+        Criar Conta
+      </v-btn>
+
+      <!-- Link para login -->
+      <div class="text-center mt-3">
+        <span>Já tem uma conta?</span>
+        <RouterLink to="/login" class="text-primary font-weight-bold">
+          Entrar
+        </RouterLink>
+      </div>
+
+      <!-- Snackbar de feedback -->
+      <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+        {{ snackbarMsg }}
+      </v-snackbar>
+    </v-card>
+  </v-container>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const nome = ref('')
+const email = ref('')
+const senha = ref('')
+const confirmarSenha = ref('')
+
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
+
+const router = useRouter()
+
+// Validaçoes
+const senhaMinima = (v) =>
+  v.length >= 6 || 'A senha deve ter pelo menos 6 caracteres'
+
+const confirmaSenha = () =>
+  senha.value === confirmarSenha.value || 'As senhas não coincidem'
+
+function fazerCadastro() {
+  if (!nome.value || !email.value || !senha.value || !confirmarSenha.value) {
+    snackbarMsg.value = 'Preencha todos os campos obrigatórios'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+    return
   }
-  </script>
-  
+
+  if (senha.value !== confirmarSenha.value) {
+    snackbarMsg.value = 'As senhas não coincidem'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+    return
+  }
+
+  // Salva o usuário no localStorage com email (essencial para filtro de reservas)
+  const novoUsuario = {
+    nome: nome.value,
+    email: email.value,
+    senha: senha.value
+  }
+
+  localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario))
+
+  snackbarMsg.value = 'Cadastro realizado com sucesso!'
+  snackbarColor.value = 'success'
+  snackbar.value = true
+
+  setTimeout(() => {
+    router.push('/home') // vai direto pra home após cadastro
+  }, 1500)
+}
+</script>

@@ -1,61 +1,76 @@
 <template>
   <v-container>
-    <div v-if="!logado">
-      <h2>Login</h2>
-      <v-text-field v-model="usuario" label="Usuário" />
-      <v-text-field v-model="senha" label="Senha" type="password" />
-      <v-btn color="primary" @click="fazerLogin">Entrar</v-btn>
-      <v-btn variant="text" color="secondary" @click="router.push('/cadastro')">
-        Criar nova conta
-      </v-btn>
-    </div>
+    <v-card class="pa-6 mx-auto" max-width="400">
+      <h2 class="text-center mb-4">🔐 Login</h2>
 
-    <div v-else>
-      <h2>Bem-vindo, {{ usuario }}!</h2>
-      <v-btn color="error" @click="logout">Sair</v-btn>
-    </div>
+      <v-text-field
+        label="E-mail"
+        v-model="email"
+        type="email"
+        required
+      />
+
+      <v-text-field
+        label="Senha"
+        v-model="senha"
+        type="password"
+        required
+      />
+
+      <v-btn
+        class="mt-4"
+        color="blue-darken-2"
+        block
+        @click="fazerLogin"
+      >
+        Entrar
+      </v-btn>
+
+      <div class="text-center mt-3">
+        <span>Não tem uma conta?</span>
+        <RouterLink to="/cadastro" class="text-primary font-weight-bold">
+          Cadastre-se
+        </RouterLink>
+      </div>
+
+      <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+        {{ snackbarMsg }}
+      </v-snackbar>
+    </v-card>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const usuario = ref('')
+const email = ref('')
 const senha = ref('')
-const logado = ref(false)
 const router = useRouter()
 
-onMounted(() => {
-  const user = localStorage.getItem('usuario')
-  const pass = localStorage.getItem('senha')
-  if (user && pass) {
-    usuario.value = user
-    senha.value = pass
-    logado.value = true
-  }
-})
+const snackbar = ref(false)
+const snackbarMsg = ref('')
+const snackbarColor = ref('success')
 
 function fazerLogin() {
-  const userCadastrado = localStorage.getItem('usuario_cadastrado')
-  const senhaCadastrada = localStorage.getItem('senha_cadastrada')
+  const usuarioSalvo = JSON.parse(localStorage.getItem('usuarioLogado'))
 
-  if (usuario.value === userCadastrado && senha.value === senhaCadastrada) {
-    localStorage.setItem('usuario', usuario.value)
-    localStorage.setItem('senha', senha.value)
-    logado.value = true
-    router.push('/home')
+  if (
+    usuarioSalvo &&
+    usuarioSalvo.email === email.value &&
+    usuarioSalvo.senha === senha.value
+  ) {
+    snackbarMsg.value = 'Login realizado com sucesso!'
+    snackbarColor.value = 'success'
+    snackbar.value = true
+
+    setTimeout(() => {
+      router.push('/home')
+    }, 1000)
   } else {
-    alert('Usuário ou senha inválidos!')
+    snackbarMsg.value = 'E-mail ou senha incorretos'
+    snackbarColor.value = 'error'
+    snackbar.value = true
   }
-}
-
-function logout() {
-  localStorage.removeItem('usuario')
-  localStorage.removeItem('senha')
-  usuario.value = ''
-  senha.value = ''
-  logado.value = false
-  router.push('/')
 }
 </script>

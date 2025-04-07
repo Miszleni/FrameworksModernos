@@ -127,12 +127,10 @@ const horariosDisponiveis = computed(() => {
   const hojeData = new Date()
   const horarios = sala?.horarios || []
 
-  // Data futura: mostra tudo
   if (dataEscolhida.getTime() > hojeData.setHours(0, 0, 0, 0)) {
     return horarios
   }
 
-  // Hoje: remove horarios que já passaram
   const agora = new Date()
   const horaAtual = agora.getHours()
   const minutoAtual = agora.getMinutes()
@@ -146,15 +144,27 @@ const horariosDisponiveis = computed(() => {
 })
 
 function reservarSala() {
+  const usuario = JSON.parse(localStorage.getItem('usuarioLogado'))
+
+  if (!usuario || !usuario.email) {
+    snackbarMsg.value = 'Você precisa estar logado para reservar!'
+    snackbarTipo.value = 'error'
+    snackbar.value = true
+    router.push('/login')
+    return
+  }
+
   const reservas = JSON.parse(localStorage.getItem('reservas')) || []
 
   const novaReserva = {
     id: crypto.randomUUID(),
     sala: sala.nome,
+    salaId: sala.id,
     horario: horarioSelecionado.value,
     data: dataSelecionada.value.split('-').reverse().join('/'),
     nome: nomeReserva.value,
-    observacao: observacao.value
+    observacao: observacao.value,
+    usuarioEmail: usuario.email // 🔐 ESSENCIAL!
   }
 
   const jaExiste = reservas.some(
@@ -165,7 +175,7 @@ function reservarSala() {
   )
 
   if (jaExiste) {
-    snackbarMsg.value = 'Você já reservou essa sala nesse horário e data!'
+    snackbarMsg.value = 'Essa sala já está reservada nesse horário!'
     snackbarTipo.value = 'error'
     snackbar.value = true
     return
@@ -173,8 +183,6 @@ function reservarSala() {
 
   reservas.push(novaReserva)
   localStorage.setItem('reservas', JSON.stringify(reservas))
-
-  // Ele notifica todas as outras paginas (incluindo Home.vue) para atualizar
   localStorage.setItem('lastRefresh', Date.now().toString())
 
   router.push(`/reserva-confirmada?id=${novaReserva.id}`)
